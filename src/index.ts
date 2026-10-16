@@ -40,11 +40,12 @@ export function apply(ctx: Context, rawConfig?: AgyPluginConfig): void {
       },
     ]);
 
-    // 3. dsh 0.2 移除了 settings.installSection，改为 settings.configure()。
-    // 本插件自带 settings.section 页面（src/client.ts），所以这里是声明「宿主
-    // 不要再按 Config 自动生成一页」，而不是注册表单。
-    // ponytail: Config 未标 .volatile()，宿主无表单可生成，agyPath 等改配置走
-    // profile 的 cordis.patch.yml；要 UI 可编辑时再给字段加 .volatile() 并读 ref。
+    // 3. dsh 0.2 removed settings.installSection in favour of settings.configure().
+    // This plugin ships its own settings.section page (src/client.ts), so this call
+    // tells the host not to auto-generate a second page from Config.
+    // ponytail: Config fields are not marked .volatile(), so the host has no form to
+    // generate and agyPath etc. are configured in the profile's cordis.patch.yml.
+    // Mark the fields .volatile() and read the refs when in-UI editing is needed.
     ctx.inject(['settings'], (settingsCtx: any) => {
       settingsCtx.settings.configure({ auto: false }, ctx.fiber);
     });

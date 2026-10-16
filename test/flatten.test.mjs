@@ -17,7 +17,7 @@ test('TranscriptFlattener - extractBlockText', () => {
   assert.match(extractedTc, /search/);
   assert.match(extractedTc, /test query/);
 
-  // dsh 0.2：工具结果是自己的一种消息角色，不再是内容块。
+  // Since dsh 0.2 a tool result is its own message role, not a content block.
   const toolResultMessage = {
     role: 'tool',
     toolCallId: 'call_1',

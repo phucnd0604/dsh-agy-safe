@@ -31,7 +31,7 @@ export function apply(ctx: ClientContext): void {
           setStatus(json.value);
         }
       } catch (err: any) {
-        setMessage('无法连接宿主接口: ' + (err.message || String(err)));
+        setMessage('Cannot reach the host API: ' + (err.message || String(err)));
       } finally {
         setLoading(false);
       }
@@ -57,18 +57,18 @@ export function apply(ctx: ClientContext): void {
         });
         const json = await res.json();
         if (json.ok && json.value?.started) {
-          setMessage('已在桌面弹出系统终端，请在终端窗口完成 Antigravity 登录。');
+          setMessage('A system terminal was opened on the desktop — finish the Antigravity login there.');
         } else {
-          setMessage('无法自动弹出终端，请手动在终端中运行 agy 进行登录。');
+          setMessage('Could not open a terminal automatically — run agy in a terminal yourself to log in.');
         }
       } catch (err: any) {
-        setMessage('启动登录终端失败: ' + (err.message || String(err)));
+        setMessage('Failed to launch the login terminal: ' + (err.message || String(err)));
       }
     };
 
     const handleVerify = async () => {
       setVerifying(true);
-      setMessage('正在向 Antigravity CLI 发送验证请求...');
+      setMessage('Sending a verification request to Antigravity CLI...');
       try {
         const res = await fetch('/api/dsh-agy/verify', {
           method: 'POST',
@@ -77,13 +77,13 @@ export function apply(ctx: ClientContext): void {
         });
         const json = await res.json();
         if (json.ok && json.value?.authenticated) {
-          setMessage('凭据验证通过！Antigravity CLI 模型可正常调用。');
+          setMessage('Credentials verified — Antigravity CLI models are usable.');
           loadStatus();
         } else {
-          setMessage('凭据验证未通过: ' + (json.value?.error || '未登录或会话已过期'));
+          setMessage('Credential verification failed: ' + (json.value?.error || 'not logged in, or the session has expired'));
         }
       } catch (err: any) {
-        setMessage('验证调用失败: ' + (err.message || String(err)));
+        setMessage('Verification call failed: ' + (err.message || String(err)));
       } finally {
         setVerifying(false);
       }
@@ -102,11 +102,11 @@ export function apply(ctx: ClientContext): void {
           gap: '16px',
         },
       },
-      e('h2', { style: { margin: 0, fontSize: '18px', fontWeight: 600 } }, 'Antigravity CLI (agy) 提供商设置'),
+      e('h2', { style: { margin: 0, fontSize: '18px', fontWeight: 600 } }, 'Antigravity CLI (agy) provider settings'),
       e(
         'p',
         { style: { margin: 0, color: 'var(--dsw-alias-label-secondary, #666)', fontSize: '13px', lineHeight: 1.6 } },
-        '将本机已登录的 Antigravity CLI (agy) 无头会话作为 DeepSeek Harness 的模型后端，主会话模型与子代理模型通用。',
+        'Use the Antigravity CLI (agy) headless session logged in on this machine as a DeepSeek Harness model backend, shared by the main conversation and subagents.',
       ),
       status &&
         e(
@@ -126,30 +126,30 @@ export function apply(ctx: ClientContext): void {
           e(
             'div',
             { style: { display: 'flex', justifyContent: 'space-between' } },
-            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, '安装状态'),
+            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, 'Install status'),
             e(
               'strong',
               { style: { color: status.installed ? 'var(--dsw-alias-label-success, #2e7d32)' : 'var(--dsw-alias-label-danger, #d32f2f)' } },
-              status.installed ? `已安装 (${status.version || '未知版本'})` : '未检测到 agy',
+              status.installed ? `Installed (${status.version || 'version unknown'})` : 'agy not found',
             ),
           ),
           e(
             'div',
             { style: { display: 'flex', justifyContent: 'space-between' } },
-            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, '程序路径'),
+            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, 'Binary path'),
             e('code', { style: { fontSize: '12px' } }, status.agyPath || 'agy'),
           ),
           e(
             'div',
             { style: { display: 'flex', justifyContent: 'space-between' } },
-            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, '沙盒缓存目录'),
+            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, 'Scratch directory'),
             e('code', { style: { fontSize: '12px' } }, status.scratchDir),
           ),
           e(
             'div',
             { style: { display: 'flex', justifyContent: 'space-between' } },
-            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, '本地凭据缓存'),
-            e('span', {}, status.hasCachedAuth ? '已检测到凭据目录 (~/.gemini)' : '未检测到凭据'),
+            e('span', { style: { color: 'var(--dsw-alias-label-secondary, #666)' } }, 'Local credentials'),
+            e('span', {}, status.hasCachedAuth ? 'Credential directory found (~/.gemini)' : 'No credentials found'),
           ),
         ),
       e(
@@ -170,7 +170,7 @@ export function apply(ctx: ClientContext): void {
               fontSize: '13px',
             },
           },
-          '打开登录终端',
+          'Open login terminal',
         ),
         e(
           'button',
@@ -187,7 +187,7 @@ export function apply(ctx: ClientContext): void {
               fontSize: '13px',
             },
           },
-          verifying ? '正在验证...' : '验证登录凭据',
+          verifying ? 'Verifying...' : 'Verify credentials',
         ),
         e(
           'button',
@@ -204,7 +204,7 @@ export function apply(ctx: ClientContext): void {
               fontSize: '13px',
             },
           },
-          loading ? '刷新中...' : '刷新状态',
+          loading ? 'Refreshing...' : 'Refresh status',
         ),
       ),
       message &&

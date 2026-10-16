@@ -32,7 +32,7 @@ function tryParseJson(str: string): unknown {
 }
 
 export function extractMessageText(message: RequestMessage): string {
-  // dsh 0.2 起工具结果是自己的一种消息角色（role: 'tool'），不再是内容块。
+  // Since dsh 0.2 a tool result is its own message role (role: 'tool'), not a content block.
   if (message.role === 'tool') {
     const innerText = message.content.map(extractBlockText).filter(Boolean).join('\n');
     const errFlag = message.isError ? ' (Error)' : '';
