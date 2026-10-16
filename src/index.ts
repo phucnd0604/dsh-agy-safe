@@ -1,6 +1,5 @@
 import type { Context } from '@deepseek-ai/cordis';
 import {
-  Config,
   DEFAULT_CONFIG,
   PROVIDER_ID,
   PROVIDER_NAME,
@@ -41,23 +40,13 @@ export function apply(ctx: Context, rawConfig?: AgyPluginConfig): void {
       },
     ]);
 
-    // 3. Install settings section if settings service is available
+    // 3. dsh 0.2 移除了 settings.installSection，改为 settings.configure()。
+    // 本插件自带 settings.section 页面（src/client.ts），所以这里是声明「宿主
+    // 不要再按 Config 自动生成一页」，而不是注册表单。
+    // ponytail: Config 未标 .volatile()，宿主无表单可生成，agyPath 等改配置走
+    // profile 的 cordis.patch.yml；要 UI 可编辑时再给字段加 .volatile() 并读 ref。
     ctx.inject(['settings'], (settingsCtx: any) => {
-      settingsCtx.settings.installSection(ctx, SETTINGS_NS, Config, resolvedConfig, {
-        setSource: (source: () => AgyPluginConfig) => {
-          resolvedConfig = {
-            ...DEFAULT_CONFIG,
-            ...source(),
-          };
-        },
-        onChange: () => {
-          try {
-            registration.replace([PROVIDER_ID]);
-          } catch {
-            // Registration disposed or replaced
-          }
-        },
-      });
+      settingsCtx.settings.configure({ auto: false }, ctx.fiber);
     });
 
     // 4. Register webServer routes for status probe and login terminal

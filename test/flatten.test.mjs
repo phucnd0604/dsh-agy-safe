@@ -17,14 +17,18 @@ test('TranscriptFlattener - extractBlockText', () => {
   assert.match(extractedTc, /search/);
   assert.match(extractedTc, /test query/);
 
-  const toolResultBlock = {
-    type: 'tool-result',
+  // dsh 0.2：工具结果是自己的一种消息角色，不再是内容块。
+  const toolResultMessage = {
+    role: 'tool',
     toolCallId: 'call_1',
     content: [{ type: 'text', text: 'found 3 results' }],
   };
-  const extractedTr = extractBlockText(toolResultBlock);
+  const extractedTr = extractMessageText(toolResultMessage);
   assert.match(extractedTr, /\[Tool Result for call_1\]/);
   assert.match(extractedTr, /found 3 results/);
+
+  const failedResult = extractMessageText({ ...toolResultMessage, isError: true });
+  assert.match(failedResult, /\[Tool Result for call_1 \(Error\)\]/);
 });
 
 test('TranscriptFlattener - computeFingerprint determinism and chaining', () => {

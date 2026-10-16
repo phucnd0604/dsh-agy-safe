@@ -81,25 +81,27 @@
 
 ## 快速上手
 
-**兼容性**：插件适配 dsh v0.1.2-rc.1 的 Web 界面，运行环境需具备 Node.js 20 及更高版本。
+**兼容性**：插件适配 dsh **v0.2.0-rc.2**（Web 与桌面端 profile），运行环境需具备 Node.js 20 及更高版本。
+
+> dsh 0.2 移除了旧的 `settings.installSection`，本仓库已迁移（见 `src/index.ts` 第 3 步）。宿主不再按 Config 自动生成设置表单，`agyPath` / `defaultEffort` / 超时等配置改在 profile 的 `cordis.patch.yml` 里写；设置页只提供安装检测、登录终端与凭据验证。
 
 ### 一行命令安装
 
 在 DeepSeek Harness 环境中执行安装命令：
 
 ```bash
-dsh plugin --profile web add dsh-agy-safe
+dsh plugin --profile desktop add github:phucnd0604/dsh-agy-safe
 ```
 
-发布到 npm 的包里已含编译产物 `lib/`（`npm publish` 经 `prepare` 自动构建），单条命令即可安装，无需其他配置。
+本仓库已把编译产物 `lib/` 一并入库，`github:` 源安装后即可直接用，不需要 pnpm 放行构建脚本。
 
 如需使用本地源码路径联调：
 
 ```bash
-dsh plugin --profile web add <本地仓库路径>
+dsh plugin --profile desktop add <本地仓库路径>
 ```
 
-> 本地仓库与 `github:` 源不包含 `lib/`（构建产物不入库）：`github:` 安装依赖 pnpm 执行 `prepare` 构建，若 pnpm 提示忽略了 `dsh-agy-safe` 的构建脚本，需在 profile 的 `pnpm-workspace.yaml` 的 `allowBuilds` 中放行（`dsh-agy-safe@0.1.0: true`）后重新安装。
+> 若要把 `lib/` 从版本库里拿掉、改回安装时构建：删掉 `lib/` 的提交并在 profile 的 `pnpm-workspace.yaml` 的 `allowBuilds` 中放行 `dsh-agy-safe: true`，再重新安装。
 
 安装完成后重新启动服务：
 

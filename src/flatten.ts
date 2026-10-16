@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { ContentBlock, Message, ToolSchema } from '@deepseek-ai/dsh-llm';
+import type { ContentBlock, RequestMessage, ToolSchema } from '@deepseek-ai/dsh-llm';
 import { buildToolSystemPrompt, TOOL_CALL_START, TOOL_CALL_END } from './tool-protocol.js';
 
 export interface FlattenedTurn {
@@ -16,13 +16,8 @@ export function extractBlockText(block: ContentBlock): string {
       return ''; // Reasoning is internal, omit from flattened prompt
     case 'tool-call':
       return `${TOOL_CALL_START}\n${JSON.stringify({ name: block.name, arguments: tryParseJson(block.arguments) }, null, 2)}\n${TOOL_CALL_END}`;
-    case 'tool-result': {
-      const innerText = block.content.map(extractBlockText).filter(Boolean).join('\n');
-      const errFlag = block.isError ? ' (Error)' : '';
-      return `[Tool Result for ${block.toolCallId}${errFlag}]:\n${innerText}`;
-    }
     case 'image':
-      return `[Image attached: ${block.attachment?.id ?? 'image'}]`;
+      return `[Image attached: ${block.attachment?.attachmentId ?? 'image'}]`;
     default:
       return '';
   }
@@ -36,14 +31,14 @@ function tryParseJson(str: string): unknown {
   }
 }
 
-export function extractMessageText(message: Message): string {
-  if (Array.isArray(message.content)) {
-    return message.content.map(extractBlockText).filter(Boolean).join('\n');
+export function extractMessageText(message: RequestMessage): string {
+  // dsh 0.2 起工具结果是自己的一种消息角色（role: 'tool'），不再是内容块。
+  if (message.role === 'tool') {
+    const innerText = message.content.map(extractBlockText).filter(Boolean).join('\n');
+    const errFlag = message.isError ? ' (Error)' : '';
+    return `[Tool Result for ${message.toolCallId}${errFlag}]:\n${innerText}`;
   }
-  if (typeof message.content === 'string') {
-    return message.content;
-  }
-  return '';
+  return message.content.map(extractBlockText).filter(Boolean).join('\n');
 }
 
 export class TranscriptFlattener {
@@ -57,7 +52,7 @@ export class TranscriptFlattener {
     return hash.digest('hex');
   }
 
-  static flattenTurns(messages: readonly Message[], baseFingerprint = ''): FlattenedTurn[] {
+  static flattenTurns(messages: readonly RequestMessage[], baseFingerprint = ''): FlattenedTurn[] {
     const turns: FlattenedTurn[] = [];
     let currentHash = baseFingerprint;
 
